@@ -108,7 +108,7 @@ export const createOrder = catchAsync(async (req, res) => {
     await session.withTransaction(async () => {
       for (const item of cart.items) {
         await decrementStock(session, item.product, item.variantId, item.quantity);
-        await decrementStock(null, item.product, item.variantId, item.quantity);
+        // await decrementStock(session, item.product, item.variantId, item.quantity);
 
       }
 
