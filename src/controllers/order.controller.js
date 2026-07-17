@@ -111,7 +111,6 @@ export const createOrder = catchAsync(async (req, res) => {
         await decrementStock(null, item.product, item.variantId, item.quantity);
 
       }
-      console.log("hello")
 
       const [order] = await Order.create(
         [
@@ -151,8 +150,6 @@ export const createOrder = catchAsync(async (req, res) => {
         appliedCoupon.usedCount += 1;
 
         await appliedCoupon.save({ session });
-
-        await appliedCoupon.save();
 
       }
 
