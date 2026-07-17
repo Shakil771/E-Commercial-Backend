@@ -177,13 +177,36 @@ export const updateProduct = catchAsync(async (req, res) => {
     updates.tags = updates.tags.split(',').map((tag) => tag.trim().toLowerCase());
   }
 
+  console.log(req.body);
+console.log("specifications:", req.body.specifications);
+console.log("variants:", req.body.variants);
+
   if (typeof updates.specifications === 'string') {
     updates.specifications = JSON.parse(updates.specifications);
-  }
+  } 
 
   if (typeof updates.variants === 'string') {
     updates.variants = JSON.parse(updates.variants);
   }
+
+  // if ( 
+  //   typeof updates.specifications === 'string' &&
+  //   updates.specifications.trim() !== ''
+  // ) {
+  //   updates.specifications = JSON.parse(updates.specifications);
+  // } else {
+  //   delete updates.specifications;
+  // }
+  
+  // if (
+  //   typeof updates.variants === 'string' &&
+  //   updates.variants.trim() !== ''
+  // ) {
+  //   updates.variants = JSON.parse(updates.variants);
+  // } else {
+  //   delete updates.variants;
+  // }
+
 
   if (req.files && req.files.length > 0) {
     const newImages = await uploadMultipleToCloudinary(req.files, 'products');

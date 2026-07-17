@@ -60,6 +60,7 @@ const restockItems = async (order) => {
  * @access  Private
  */
 export const createOrder = catchAsync(async (req, res) => {
+
   const { shippingAddress, paymentMethod, couponCode } = req.body;
 
   const cart = await Cart.findOne({ user: req.user._id });
@@ -107,7 +108,10 @@ export const createOrder = catchAsync(async (req, res) => {
     await session.withTransaction(async () => {
       for (const item of cart.items) {
         await decrementStock(session, item.product, item.variantId, item.quantity);
+        await decrementStock(null, item.product, item.variantId, item.quantity);
+
       }
+      console.log("hello")
 
       const [order] = await Order.create(
         [
@@ -136,6 +140,7 @@ export const createOrder = catchAsync(async (req, res) => {
         { session }
       );
 
+
       if (appliedCoupon) {
         const userUsage = appliedCoupon.usedBy.find((entry) => entry.user.toString() === req.user._id.toString());
         if (userUsage) {
@@ -144,11 +149,19 @@ export const createOrder = catchAsync(async (req, res) => {
           appliedCoupon.usedBy.push({ user: req.user._id, count: 1 });
         }
         appliedCoupon.usedCount += 1;
+
         await appliedCoupon.save({ session });
+
+        await appliedCoupon.save();
+
       }
 
       createdOrder = order;
+
+
     });
+
+
   } finally {
     session.endSession();
   }

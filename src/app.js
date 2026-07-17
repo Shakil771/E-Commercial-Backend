@@ -4,19 +4,19 @@ import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
+import mongoSanitize from 'express-mongo-sanitize';  
+import xss from 'xss-clean'; 
 import hpp from 'hpp';
-
+   
 import env from './config/env.js';
-import routes from './routes/index.js';
+import routes from './routes/index.js'; 
 import { globalLimiter } from './middlewares/rateLimiter.middleware.js';
 import notFoundMiddleware from './middlewares/notFound.middleware.js';
 import errorMiddleware from './middlewares/error.middleware.js';
-import logger from './utils/logger.js';
+import logger from './utils/logger.js';  
 import { stripeWebhook } from './controllers/payment.controller.js';
 
-const app = express();
+const app = express(); 
 
 // Behind a reverse proxy (Heroku, Nginx, etc.) - needed for correct client IPs & secure cookies
 app.set('trust proxy', 1);
@@ -31,7 +31,7 @@ app.use(
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   })
-);
+); 
 
 // Stripe webhook must receive the RAW body for signature verification,
 // so it is registered before the JSON body parser below.

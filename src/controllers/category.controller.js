@@ -56,7 +56,7 @@ export const createCategory = catchAsync(async (req, res) => {
   new ApiResponse(201, { category }, 'Category created successfully').send(res);
 });
 
-/**
+/** 
  * @route   PATCH /api/v1/categories/:id
  * @access  Private/Admin
  */
