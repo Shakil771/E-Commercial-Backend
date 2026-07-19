@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
+import ms from 'ms';
 import { ROLES, ALL_ROLES } from '../constants/roles.js';
+import env from '../config/env.js';
 
 const addressSchema = new mongoose.Schema(
   {
@@ -62,10 +63,14 @@ const userSchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     emailVerificationToken: String,
-    emailVerificationExpires: Date,
+    emailVerificationExpires: {
+      type: Date,
+      default: () => new Date(Date.now() + ms(env.email.activation_token_expires_in)), // 10m from now
+      expires: 0
+    },
     passwordResetToken: String,
     passwordResetExpires: Date,
     passwordChangedAt: Date,
@@ -94,19 +99,6 @@ userSchema.methods.changedPasswordAfter = function changedPasswordAfter(jwtTimes
   return jwtTimestamp < changedTimestamp;
 };
 
-userSchema.methods.createPasswordResetToken = function createPasswordResetToken() {
-  const resetToken = crypto.randomBytes(32).toString('hex');
-  this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-  return resetToken;
-};
-
-userSchema.methods.createEmailVerificationToken = function createEmailVerificationToken() {
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-  this.emailVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
-  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-  return verificationToken;
-};
 
 userSchema.methods.toSafeObject = function toSafeObject() {
   const obj = this.toObject();

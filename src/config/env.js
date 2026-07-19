@@ -53,6 +53,10 @@ const env = {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   },
+  email: {
+    activation_token_expires_in : process.env.ACTIVATION_TOKEN_EXPIRES_IN,
+    password_reset_token_expires_in : process.env.PASSWORD_RESET_TOKEN_EXPIRES_IN
+  },
 
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000,

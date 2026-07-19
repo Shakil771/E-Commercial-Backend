@@ -5,7 +5,7 @@ import logger from '../utils/logger.js';
 const transporter = nodemailer.createTransport({
   host: env.smtp.host,
   port: env.smtp.port,
-  secure: env.smtp.secure,
+  secure: true,
   auth: {
     user: env.smtp.user,
     pass: env.smtp.pass,
@@ -46,7 +46,7 @@ export const buildEmailVerificationEmail = (name, verificationUrl) => ({
       <p style="margin: 24px 0;">
         <a href="${verificationUrl}" style="background-color:#111827;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;">Verify Email</a>
       </p>
-      <p>This link will expire in 24 hours. If you did not create this account, you can safely ignore this email.</p>
+      <p>This link will expire in 10 minutes. If you did not create this account, you can safely ignore this email.</p>
     </div>
   `,
 });
@@ -90,7 +90,7 @@ export const buildOrderConfirmationEmail = (name, order) => ({
             </tr>`
             )
             .join('')}
-        </tbody>
+        </tbody> 
       </table>
       <p><strong>Total: $${order.totalPrice.toFixed(2)}</strong></p>
       <p>We will notify you again once your order has shipped.</p>

@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import User from '../models/User.model.js';
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
@@ -7,6 +6,7 @@ import { issueTokenPair, rotateRefreshToken, revokeRefreshToken, revokeAllUserTo
 import { refreshTokenCookieOptions } from '../utils/generateTokens.js';
 import { sendEmail, buildEmailVerificationEmail, buildPasswordResetEmail } from '../services/email.service.js';
 import env from '../config/env.js';
+import { createEmailVerificationToken } from '../utils/token.utils.js';
 
 const REFRESH_COOKIE_NAME = 'refreshToken';
 
@@ -29,18 +29,65 @@ const respondWithAuth = async (res, statusCode, user, message) => {
  * @route   POST /api/v1/auth/register
  * @access  Public
  */
+
+
+// export const register = catchAsync(async (req, res) => {
+//   const { name, email, password, phone } = req.body;
+
+//   const existingUser = await User.findOne({ email: email.toLowerCase() });
+//   if (existingUser) {
+//     throw ApiError.conflict('An account with this email already exists');
+//   }
+
+//   const user = await User.create({ name, email, password, phone });
+
+
+//   const emailToken = generateEmailVerificationToken(user._id);
+//   const verificationUrl = `${env.clientUrl}/verify-email/${verificationToken}`;
+//   const { subject, html } = buildEmailVerificationEmail(user.name, verificationUrl);
+
+//   try {
+//     await sendEmail({
+//       to: user.email,
+//       subject: 'Verify your email address',
+//       html: verifyEmailTemplate(user.name, verifyUrl),
+//     });
+//   } catch (err) {
+//     console.error('[Email] Failed to send verification email:', err.message);
+//   }
+
+//   return new ApiResponse(
+//      201,
+//     { user: user.toSafeObject() },
+//     'Registration successful. Please check your email to verify your account.'
+//   ).send(res);
+// }); 
+
+
 export const register = catchAsync(async (req, res) => {
   const { name, email, password, phone } = req.body;
-
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
     throw ApiError.conflict('An account with this email already exists');
   }
+  // console.log("hello", { name, email, password, phone })
 
   const user = await User.create({ name, email, password, phone });
+  console.log("hello", { name, email, password, phone })
 
-  const verificationToken = user.createEmailVerificationToken();
-  await user.save({ validateBeforeSave: false });
+  // const verificationToken = user.createEmailVerificationToken();
+  // await user.save({ validateBeforeSave: false });
+
+  const {
+    token: verificationToken,
+    hashedToken,
+    expires,
+  } = createEmailVerificationToken();
+
+  user.emailVerificationToken = hashedToken;
+  // user.emailVerificationExpires = expires;
+
+  await user.save({ validateBeforeSave: false, });
 
   const verificationUrl = `${env.clientUrl}/verify-email/${verificationToken}`;
   const { subject, html } = buildEmailVerificationEmail(user.name, verificationUrl);
@@ -64,7 +111,7 @@ export const register = catchAsync(async (req, res) => {
 export const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+  const user = await User.findOne({ email: email.toLowerCase(), isActive: true }).select('+password');
 
   if (!user || !(await user.comparePassword(password))) {
     throw ApiError.unauthorized('Incorrect email or password');
@@ -119,7 +166,7 @@ export const logout = catchAsync(async (req, res) => {
  * @access  Public
  */
 export const verifyEmail = catchAsync(async (req, res) => {
-  const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const hashedToken = hashToken(req.params.token);
 
   const user = await User.findOne({
     emailVerificationToken: hashedToken,
@@ -130,6 +177,7 @@ export const verifyEmail = catchAsync(async (req, res) => {
     throw ApiError.badRequest('Verification link is invalid or has expired');
   }
 
+  user.isActive = true;
   user.isEmailVerified = true;
   user.emailVerificationToken = undefined;
   user.emailVerificationExpires = undefined;
@@ -149,7 +197,17 @@ export const resendVerificationEmail = catchAsync(async (req, res) => {
     throw ApiError.badRequest('Your email is already verified');
   }
 
-  const verificationToken = user.createEmailVerificationToken();
+  // const verificationToken = user.createEmailVerificationToken();
+
+  const {
+    token: verificationToken,
+    hashedToken,
+    expires,
+  } = createEmailVerificationToken();
+
+  user.emailVerificationToken = hashedToken;
+  user.emailVerificationExpires = expires;
+
   await user.save({ validateBeforeSave: false });
 
   const verificationUrl = `${env.clientUrl}/verify-email/${verificationToken}`;
@@ -173,8 +231,17 @@ export const forgotPassword = catchAsync(async (req, res) => {
     return new ApiResponse(200, null, 'If an account with that email exists, a reset link has been sent').send(res);
   }
 
-  const resetToken = user.createPasswordResetToken();
-  await user.save({ validateBeforeSave: false });
+  // const resetToken = user.createPasswordResetToken();
+  const {
+    token: resetToken,
+    hashedToken,
+    expires,
+  } = createPasswordResetToken();
+  
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpires = expires;
+  
+  await user.save({ validateBeforeSave:false });
 
   const resetUrl = `${env.clientUrl}/reset-password/${resetToken}`;
   const { subject, html } = buildPasswordResetEmail(user.name, resetUrl);
@@ -198,7 +265,7 @@ export const forgotPassword = catchAsync(async (req, res) => {
 export const resetPassword = catchAsync(async (req, res) => {
   const { token, password } = req.body;
 
-  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+const hashedToken = hashToken(token);
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,

@@ -103,15 +103,14 @@ export const createOrder = catchAsync(async (req, res) => {
 
   const session = await mongoose.startSession();
   let createdOrder;
-
+ 
   try {
-    await session.withTransaction(async () => {
+    await session.withTransaction(async () => { 
       for (const item of cart.items) {
         await decrementStock(session, item.product, item.variantId, item.quantity);
-        // await decrementStock(session, item.product, item.variantId, item.quantity);
 
       }
-
+ 
       const [order] = await Order.create(
         [
           {
