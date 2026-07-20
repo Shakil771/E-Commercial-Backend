@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema(
     emailVerificationToken: String,
     emailVerificationExpires: {
       type: Date,
-      default: () => new Date(Date.now() + ms(env.email.activation_token_expires_in)), // 10m from now
+      // default: () => new Date(Date.now() + ms(env.email.activation_token_expires_in)), // 10m from now
       expires: 0
     },
     passwordResetToken: String,
