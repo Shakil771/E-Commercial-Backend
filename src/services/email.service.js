@@ -4,7 +4,7 @@ import logger from '../utils/logger.js';
 
 const transporter = nodemailer.createTransport({
   host: env.smtp.host,
-  port: env.smtp.port,
+  port:Number(env.smtp.port),
   secure: true,
   auth: {
     user: env.smtp.user,
