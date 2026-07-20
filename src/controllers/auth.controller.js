@@ -56,17 +56,13 @@ export const register = catchAsync(async (req, res) => {
   try {
     await sendEmail({ to: user.email, subject, html });
   } catch (error) {
-    // Non-fatal: registration succeeds even if the email fails to send
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpires = undefined;
-    await user.save({ validateBeforeSave: false });
+    await User.findByIdAndDelete(user._id);
+    throw ApiError.internal('Failed to send verification email. Please try again.');
   }
 
-  new ApiResponse(
-    201,
-    {
-      email: user.email,
-    },
+  new ApiResponse(201, {
+    email: user.email,
+  },
     'Registration successful. Please check your email to verify your account.'
   ).send(res);
 
