@@ -1,6 +1,10 @@
 import nodemailer from 'nodemailer';
 import env from '../config/env.js';
 import logger from '../utils/logger.js';
+import { Resend } from 'resend';
+
+
+const resend = new Resend(env.resend.resend_api_key);
 
 const transporter = nodemailer.createTransport({
   host: env.smtp.host,
@@ -8,10 +12,10 @@ const transporter = nodemailer.createTransport({
   secure: env.smtp.secure,
   auth: {
     user: env.smtp.user,
-    pass: env.smtp.pass, 
+    pass: env.smtp.pass,
   },
 });
- 
+
 /**
  * Sends an email using the configured SMTP transport.
  * @param {object} options
@@ -20,24 +24,60 @@ const transporter = nodemailer.createTransport({
  * @param {string} options.html
  * @param {string} [options.text]
  */
+
+
+// export const sendEmail = async ({ to, subject, html, text }) => {
+//   console.log("this is transporter",transporter)
+//   try {
+//     const info = await transporter.sendMail({
+//       from: env.smtp.from,
+//       to,
+//       subject,
+//       html,
+//       text: text || html.replace(/<[^>]*>/g, ''),
+//     });
+//     logger.info(`Email sent to ${to}: ${info.messageId}`);
+//     return info;
+//   } catch (error) {
+//     logger.error(`Failed to send email to ${to}: ${error.message}`);
+//     throw error;
+//   }
+// };
+
+
+
 export const sendEmail = async ({ to, subject, html, text }) => {
-  console.log("this is transporter",transporter)
+
   try {
-    const info = await transporter.sendMail({
-      from: env.smtp.from,
+    const { data, error } = await resend.emails.send({
+      from: env.resend.from,
       to,
       subject,
       html,
-      text: text || html.replace(/<[^>]*>/g, ''),
+      text,
     });
-    logger.info(`Email sent to ${to}: ${info.messageId}`);
-    return info;
+    if (error) {
+      throw new Error(error.message);
+    }
+    console.log(`Email sent to ${to}: ${data}`)
+
+    logger.info(`Email sent to ${to}: ${data}`);
+    return data;
   } catch (error) {
-    logger.error(`Failed to send email to ${to}: ${error}`);
+    console.error("Failed to send email:", error);
+    logger.error(`Failed to send email to ${to}: ${error.message}`);
     throw error;
   }
 };
- 
+
+
+resend.emails.send({
+  from: 'skshakilkhan7357@gmail.com',
+  to: 'skshakilkhan7357@gmail.com',
+  subject: 'Hello World',
+  html: '<p>Congrats on sending your <strong>first email</strong>!</p>'
+});
+
 export const buildEmailVerificationEmail = (name, verificationUrl) => ({
   subject: 'Verify your email address',
   html: `

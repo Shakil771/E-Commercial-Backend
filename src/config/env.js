@@ -49,6 +49,11 @@ const env = {
     from: process.env.EMAIL_FROM || 'MERN Shop <no-reply@mernshop.com>',
   },
 
+  resend: {
+    resend_api_key: process.env.RESEND_API_KEY, 
+    from: process.env.FROM
+  },
+
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
