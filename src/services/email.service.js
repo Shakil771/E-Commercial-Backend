@@ -4,14 +4,14 @@ import logger from '../utils/logger.js';
 
 const transporter = nodemailer.createTransport({
   host: env.smtp.host,
-  port:Number(env.smtp.port),
-  secure: true,
+  port: env.smtp.port,
+  secure: env.smtp.secure,
   auth: {
     user: env.smtp.user,
-    pass: env.smtp.pass,
+    pass: env.smtp.pass, 
   },
 });
-
+ 
 /**
  * Sends an email using the configured SMTP transport.
  * @param {object} options
@@ -81,15 +81,15 @@ export const buildOrderConfirmationEmail = (name, order) => ({
         </thead>
         <tbody>
           ${order.items
-            .map(
-              (item) => `
+      .map(
+        (item) => `
             <tr>
               <td style="padding:8px; border-bottom:1px solid #f3f4f6;">${item.name}</td>
               <td style="padding:8px; text-align:center; border-bottom:1px solid #f3f4f6;">${item.quantity}</td>
               <td style="padding:8px; text-align:right; border-bottom:1px solid #f3f4f6;">$${item.price.toFixed(2)}</td>
             </tr>`
-            )
-            .join('')}
+      )
+      .join('')}
         </tbody> 
       </table>
       <p><strong>Total: $${order.totalPrice.toFixed(2)}</strong></p>
