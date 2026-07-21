@@ -21,6 +21,7 @@ const transporter = nodemailer.createTransport({
  * @param {string} [options.text]
  */
 export const sendEmail = async ({ to, subject, html, text }) => {
+  console.log("this is transporter",transporter)
   try {
     const info = await transporter.sendMail({
       from: env.smtp.from,
@@ -36,7 +37,7 @@ export const sendEmail = async ({ to, subject, html, text }) => {
     throw error;
   }
 };
-
+ 
 export const buildEmailVerificationEmail = (name, verificationUrl) => ({
   subject: 'Verify your email address',
   html: `
