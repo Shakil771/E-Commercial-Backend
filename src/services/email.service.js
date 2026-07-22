@@ -68,45 +68,6 @@ export const sendEmail = async ({ to, subject, html, text }) => {
 
 
 
-// const client = SibApiV3Sdk.ApiClient.instance;
-// const apiKey = client.authentications["api-key"];
-// apiKey.apiKey = env.brevo.brevo_api_key;
-
-// const emailApi = new SibApiV3Sdk.TransactionalEmailsApi();
-
-
-// export const sendEmail = async ({ to, subject, html, text }) => {
-//   try {
-//     const response = await emailApi.sendTransacEmail({
-//       sender: {
-//         name: env.brevo.email_from_name,
-//         email: env.brevo.from,
-//       },
-
-//       to: [
-//         {
-//           email: to,
-//         },
-//       ],
-
-//       subject,
-
-//       htmlContent: html,
-
-//       textContent: text || html.replace(/<[^>]*>/g, ""),
-//     });
-
-//     console.log(response);
-
-//     return response;
-//   } catch (err) {
-//     console.error(err);  
-//     throw err;
-//   }
-// };
-
-
-
 export const buildEmailVerificationEmail = (name, verificationUrl) => ({
    subject: 'Verify your email address',
    html: `

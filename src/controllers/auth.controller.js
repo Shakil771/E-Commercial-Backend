@@ -56,8 +56,9 @@ export const register = catchAsync(async (req, res) => {
   try {
     await sendEmail({ to: user.email, subject, html });
   } catch (error) {
-    await User.findByIdAndDelete(user._id);
-    throw ApiError.internal('Failed to send verification email. Please try again.');
+    // await User.findByIdAndDelete(user._id);
+    // throw ApiError.internal('Failed to send verification email. Please try again.');
+    console.log('Failed to send verification email. Please try again.')
   }
 
   new ApiResponse(201, {
