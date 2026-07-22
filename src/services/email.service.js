@@ -1,20 +1,30 @@
 import nodemailer from 'nodemailer';
 import env from '../config/env.js';
 import logger from '../utils/logger.js';
-import { Resend } from 'resend';
 
 
-const resend = new Resend(env.resend.resend_api_key);
+import SibApiV3Sdk from "sib-api-v3-sdk";
+
 
 const transporter = nodemailer.createTransport({
-  host: env.smtp.host,
-  port: env.smtp.port,
-  secure: env.smtp.secure,
-  auth: {
-    user: env.smtp.user,
-    pass: env.smtp.pass,
-  },
+   host: "smtp.gmail.com",
+   port: 465,
+   secure: true,
+   auth: {
+      user: "skshakilkhan7357@gmail.com",
+      pass: "oitlwpmdqswircxz",
+   },
 });
+
+// const transporter = nodemailer.createTransport({
+//   host: env.smtp.host,
+//   port: env.smtp.port,
+//   secure: env.smtp.secure,
+//   auth: {
+//     user: env.smtp.user,
+//     pass: env.smtp.pass,
+//   },
+// });
 
 /**
  * Sends an email using the configured SMTP transport.
@@ -26,61 +36,65 @@ const transporter = nodemailer.createTransport({
  */
 
 
+export const sendEmail = async ({ to, subject, html, text }) => {
+   console.log("this is transporter", transporter)
+   try {
+      const info = await transporter.sendMail({
+         from: env.smtp.from,
+         to,
+         subject,
+         html,
+         text: text || html.replace(/<[^>]*>/g, ''),
+      });
+      logger.info(`Email sent to ${to}: ${info.messageId}`);
+      return info;
+   } catch (error) {
+      logger.error(`Failed to send email to ${to}: ${error.message}`);
+      throw error;
+   }
+};
+
+// const client = SibApiV3Sdk.ApiClient.instance;
+// const apiKey = client.authentications["api-key"];
+// apiKey.apiKey = env.brevo.brevo_api_key;
+
+// const emailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+
+
 // export const sendEmail = async ({ to, subject, html, text }) => {
-//   console.log("this is transporter",transporter)
 //   try {
-//     const info = await transporter.sendMail({
-//       from: env.smtp.from,
-//       to,
+//     const response = await emailApi.sendTransacEmail({
+//       sender: {
+//         name: env.brevo.email_from_name,
+//         email: env.brevo.from,
+//       },
+
+//       to: [
+//         {
+//           email: to,
+//         },
+//       ],
+
 //       subject,
-//       html,
-//       text: text || html.replace(/<[^>]*>/g, ''),
+
+//       htmlContent: html,
+
+//       textContent: text || html.replace(/<[^>]*>/g, ""),
 //     });
-//     logger.info(`Email sent to ${to}: ${info.messageId}`);
-//     return info;
-//   } catch (error) {
-//     logger.error(`Failed to send email to ${to}: ${error.message}`);
-//     throw error;
+
+//     console.log(response);
+
+//     return response;
+//   } catch (err) {
+//     console.error(err);  
+//     throw err;
 //   }
 // };
 
 
-
-export const sendEmail = async ({ to, subject, html, text }) => {
-
-  try {
-    const { data, error } = await resend.emails.send({
-      from: env.resend.from,
-      to,
-      subject,
-      html,
-      text,
-    });
-    if (error) {
-      throw new Error(error.message);
-    }
-    console.log(`Email sent to ${to}: ${data}`)
-
-    logger.info(`Email sent to ${to}: ${data}`);
-    return data;
-  } catch (error) {
-    console.error("Failed to send email:", error);
-    logger.error(`Failed to send email to ${to}: ${error.message}`);
-    throw error;
-  }
-};
-
-
-resend.emails.send({
-  from: 'skshakilkhan7357@gmail.com',
-  to: 'skshakilkhan7357@gmail.com',
-  subject: 'Hello World',
-  html: '<p>Congrats on sending your <strong>first email</strong>!</p>'
-});
-
 export const buildEmailVerificationEmail = (name, verificationUrl) => ({
-  subject: 'Verify your email address',
-  html: `
+   subject: 'Verify your email address',
+   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Hi ${name},</h2>
       <p>Thanks for creating an account. Please verify your email address by clicking the button below.</p>
@@ -93,8 +107,8 @@ export const buildEmailVerificationEmail = (name, verificationUrl) => ({
 });
 
 export const buildPasswordResetEmail = (name, resetUrl) => ({
-  subject: 'Reset your password',
-  html: `
+   subject: 'Reset your password',
+   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Hi ${name},</h2>
       <p>We received a request to reset your password. Click the button below to set a new password.</p>
@@ -107,8 +121,8 @@ export const buildPasswordResetEmail = (name, resetUrl) => ({
 });
 
 export const buildOrderConfirmationEmail = (name, order) => ({
-  subject: `Order Confirmation - ${order.orderNumber}`,
-  html: `
+   subject: `Order Confirmation - ${order.orderNumber}`,
+   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Hi ${name},</h2>
       <p>Thank you for your order! Your order <strong>${order.orderNumber}</strong> has been placed successfully.</p>
@@ -122,15 +136,15 @@ export const buildOrderConfirmationEmail = (name, order) => ({
         </thead>
         <tbody>
           ${order.items
-      .map(
-        (item) => `
+         .map(
+            (item) => `
             <tr>
               <td style="padding:8px; border-bottom:1px solid #f3f4f6;">${item.name}</td>
               <td style="padding:8px; text-align:center; border-bottom:1px solid #f3f4f6;">${item.quantity}</td>
               <td style="padding:8px; text-align:right; border-bottom:1px solid #f3f4f6;">$${item.price.toFixed(2)}</td>
             </tr>`
-      )
-      .join('')}
+         )
+         .join('')}
         </tbody> 
       </table>
       <p><strong>Total: $${order.totalPrice.toFixed(2)}</strong></p>

@@ -49,9 +49,10 @@ const env = {
     from: process.env.EMAIL_FROM || 'MERN Shop <no-reply@mernshop.com>',
   },
 
-  resend: {
-    resend_api_key: process.env.RESEND_API_KEY, 
-    from: process.env.FROM
+  brevo: {
+    brevo_api_key: process.env.BREVO_API_KEY, 
+    from: process.env.FROM,
+    email_from_name: process.env.EMAIL_FROM_NAME
   },
 
   stripe: {
