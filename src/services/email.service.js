@@ -6,17 +6,6 @@ import logger from '../utils/logger.js';
 import SibApiV3Sdk from "sib-api-v3-sdk";
 
 
-// const transporter = nodemailer.createTransport({
-//    host: "smtp.gmail.com",
-//    port: 587,
-//    secure: false,
-//    requireTLS: true,
-//    auth: {
-//       user: "skshakilkhan7357@gmail.com",
-//       pass: "oitlwpmdqswircxz",
-//    },
-// });
-
 const transporter = nodemailer.createTransport({
    host: env.smtp.host,
    port: env.smtp.port,
@@ -37,34 +26,75 @@ const transporter = nodemailer.createTransport({
  */
 
 
+// export const sendEmail = async ({ to, subject, html, text }) => {
+//    try {
+//       const mailData = {
+//          from: env.smtp.from,
+//          to,
+//          subject,
+//          html,
+//          text: text || html.replace(/<[^>]*>/g, ''),
+//       };
+
+//       const info = await new Promise((resolve, reject) => {
+//          transporter.sendMail(mailData, (err, info) => {
+//             if (err) {
+//                return reject(err);
+//             }
+
+//             resolve(info);
+//          });
+//       });
+
+//       logger.info(`Email sent to ${to}: ${info.messageId}`);
+
+//       return info;
+//    } catch (error) {
+//       logger.error(`Failed to send email to ${to}: ${error.message}`);
+//       throw error;
+//    }
+// };
+
+
+
+const client = SibApiV3Sdk.ApiClient.instance;
+const apiKey = client.authentications["api-key"];
+apiKey.apiKey = env.brevo.brevo_api_key;
+
+const emailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+
+
 export const sendEmail = async ({ to, subject, html, text }) => {
    try {
       const mailData = {
-         from: env.smtp.from,
-         to,
+         sender: {
+            name: env.brevo.email_from_name,
+            email: env.brevo.from,
+         },
+
+         to: [
+            {
+               email: to,
+            },
+         ],
+
          subject,
-         html,
-         text: text || html.replace(/<[^>]*>/g, ''),
+
+         htmlContent: html,
+
+         textContent: text || html.replace(/<[^>]*>/g, ""),
       };
 
-      const info = await new Promise((resolve, reject) => {
-         transporter.sendMail(mailData, (err, info) => {
-            if (err) {
-               return reject(err);
-            }
+      const info = await emailApi.sendTransacEmail(mailData);
 
-            resolve(info);
-         });
-      });
-
-      logger.info(`Email sent to ${to}: ${info.messageId}`);
+      logger.info(`Email sent to ${to}: ${info.messageId || info.messageIds || "Success"}`);
 
       return info;
    } catch (error) {
       logger.error(`Failed to send email to ${to}: ${error.message}`);
       throw error;
    }
-};
+}; 
 
 
 
