@@ -52,7 +52,7 @@ const env = {
   brevo: {
     brevo_api_key: process.env.BREVO_API_KEY, 
     from: process.env.FROM,
-    email_from_name: process.env.EMAIL_FROM_NAME
+    email_from_name: process.env.EMAIL_FROM_NAME,
   },
 
   stripe: {

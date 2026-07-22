@@ -6,26 +6,26 @@ import logger from '../utils/logger.js';
 import SibApiV3Sdk from "sib-api-v3-sdk";
 
 
+// const transporter = nodemailer.createTransport({
+//    host: "smtp.gmail.com",
+//    port: 587,
+//    secure: false,
+//    requireTLS: true,
+//    auth: {
+//       user: "skshakilkhan7357@gmail.com",
+//       pass: "oitlwpmdqswircxz",
+//    },
+// });
+
 const transporter = nodemailer.createTransport({
-   host: "smtp.gmail.com",
-   port: 587,
-   secure: false,
-   requireTLS: true,
+   host: env.smtp.host,
+   port: env.smtp.port,
+   secure: env.smtp.secure,
    auth: {
-      user: "skshakilkhan7357@gmail.com",
-      pass: "oitlwpmdqswircxz",
+      user: env.smtp.user,
+      pass: env.smtp.pass,
    },
 });
-
-// const transporter = nodemailer.createTransport({
-//   host: env.smtp.host,
-//   port: env.smtp.port,
-//   secure: env.smtp.secure,
-//   auth: {
-//     user: env.smtp.user,
-//     pass: env.smtp.pass,
-//   },
-// });
 
 /**
  * Sends an email using the configured SMTP transport.
@@ -66,6 +66,8 @@ export const sendEmail = async ({ to, subject, html, text }) => {
    }
 };
 
+
+
 // const client = SibApiV3Sdk.ApiClient.instance;
 // const apiKey = client.authentications["api-key"];
 // apiKey.apiKey = env.brevo.brevo_api_key;
@@ -102,6 +104,7 @@ export const sendEmail = async ({ to, subject, html, text }) => {
 //     throw err;
 //   }
 // };
+
 
 
 export const buildEmailVerificationEmail = (name, verificationUrl) => ({
