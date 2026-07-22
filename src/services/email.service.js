@@ -8,8 +8,9 @@ import SibApiV3Sdk from "sib-api-v3-sdk";
 
 const transporter = nodemailer.createTransport({
    host: "smtp.gmail.com",
-   port: 465,
-   secure: true,
+   port: 587,
+   secure: false,
+   requireTLS: true,
    auth: {
       user: "skshakilkhan7357@gmail.com",
       pass: "oitlwpmdqswircxz",
