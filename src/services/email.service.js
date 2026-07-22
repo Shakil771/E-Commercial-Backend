@@ -37,16 +37,27 @@ const transporter = nodemailer.createTransport({
 
 
 export const sendEmail = async ({ to, subject, html, text }) => {
-   console.log("this is transporter", transporter)
    try {
-      const info = await transporter.sendMail({
+      const mailData = {
          from: env.smtp.from,
          to,
          subject,
          html,
          text: text || html.replace(/<[^>]*>/g, ''),
+      };
+
+      const info = await new Promise((resolve, reject) => {
+         transporter.sendMail(mailData, (err, info) => {
+            if (err) {
+               return reject(err);
+            }
+
+            resolve(info);
+         });
       });
+
       logger.info(`Email sent to ${to}: ${info.messageId}`);
+
       return info;
    } catch (error) {
       logger.error(`Failed to send email to ${to}: ${error.message}`);
